@@ -6,6 +6,7 @@ namespace ProductBLL.Services
     public class ProductService : IProductService
     {
         private const string FilePath = "Data.json";
+
         public async Task CreateProductsAsync(Product product)
         {
             List<Product> products = await GetAllProductsAsync();
@@ -34,11 +35,11 @@ namespace ProductBLL.Services
             await WriteToJsonFileAsync(products);
         }
 
-        public async Task<List<Product>> GetAllProductsAsync()
+        public async Task<List<Product>> GetAllProductsAsync(int page = 1, int pageSize = 10, string searchName = "")
         {
             if (!File.Exists(FilePath))
             {
-                return new List<Product>();
+                return [];
             }
 
             using (FileStream fs = File.OpenRead(FilePath))
@@ -47,7 +48,13 @@ namespace ProductBLL.Services
                 {
                     return new List<Product>();
                 }
-                return await JsonSerializer.DeserializeAsync<List<Product>>(fs);
+                var AllProducts = await JsonSerializer.DeserializeAsync<List<Product>>(fs);
+                if (!string.IsNullOrWhiteSpace(searchName))
+                {
+                    AllProducts = AllProducts?.Where(p => p.Name.Contains(searchName)).ToList();
+                }
+                var paginatedProducts = AllProducts?.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                return paginatedProducts ?? [];
             }
         }
 

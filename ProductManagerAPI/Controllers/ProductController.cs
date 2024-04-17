@@ -22,11 +22,11 @@ namespace ProductManagerAPI.Controllers
 
         [HttpGet]
         [Route("getallproducts")]
-        public async Task<IActionResult> GetAllProduct()
+        public async Task<IActionResult> GetAllProduct(int page = 1, int pageSize = 10, string searchTerm = "")
         {
             try
             {
-                var response = await _productService.GetAllProductsAsync();
+                var response = await _productService.GetAllProductsAsync(page, pageSize, searchTerm);
                 return Ok(response);
             }
             catch (Exception ex)
