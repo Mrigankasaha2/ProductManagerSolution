@@ -21,7 +21,7 @@ namespace ProductManagerAPI.Controllers
 
 
         [HttpGet]
-        [Route ("getallproducts")]
+        [Route("getallproducts")]
         public async Task<IActionResult> GetAllProduct()
         {
             try
@@ -37,13 +37,24 @@ namespace ProductManagerAPI.Controllers
         }
 
         [HttpPost]
-        [Route ("createnewproduct")]
+        [Route("createnewproduct")]
         public async Task<IActionResult> CreateNewProduct([FromBody] Product product)
         {
             try
             {
+                if (product == null)
+                {
+                    _logger.LogWarning("Received a null product request.");
+                    return BadRequest("Request is null or empty");
+                }
                 await _productService.CreateProductsAsync(product);
+                _logger.LogInformation("Product created successfully: {ProductName}", product.Name);
                 return StatusCode(201, "Product created successfully");
+            }
+            catch(InvalidOperationException exception)
+            {
+                _logger.LogError(exception, "An error occurred while creating products");
+                return StatusCode(500, exception.Message);
             }
             catch(Exception ex)
             {
@@ -53,13 +64,29 @@ namespace ProductManagerAPI.Controllers
         }
 
         [HttpPut]
-        [Route ("updateproduct")]
+        [Route("updateproduct")]
         public async Task<IActionResult> UpdateProduct([FromBody] Product product)
         {
             try
             {
+                if (product == null)
+                {
+                    _logger.LogWarning("Received a null product request.");
+                    return BadRequest("Request is null or empty");
+                }
+                if (product.ID == 0)
+                {
+                    _logger.LogWarning("Received a request with productid 0.");
+                    return BadRequest("No product with ID 0");
+                }
                 await _productService.UpdateProductsAsync(product);
+                _logger.LogInformation("Product updated successfully: {ProductName}", product.Name);
                 return Ok("Product updated successfully");
+            }
+            catch (InvalidOperationException exception)
+            {
+                _logger.LogError(exception, "An error occurred while updating products");
+                return StatusCode(500, exception.Message);
             }
             catch (Exception ex)
             {
@@ -74,8 +101,20 @@ namespace ProductManagerAPI.Controllers
         {
             try
             {
+                if (ProductID == 0)
+                {
+                    _logger.LogWarning("Received a request with productid 0.");
+                    return BadRequest("No product with ID 0");
+                }
                 await _productService.DeleteProductsAsync(ProductID);
+                _logger.LogInformation("Product deleted successfully: {ProductID}", ProductID);
                 return Ok("Product deleted successfully");
+            }
+
+            catch (InvalidOperationException exception)
+            {
+                _logger.LogError(exception, "An error occurred while deleting products");
+                return StatusCode(500, exception.Message);
             }
             catch (Exception ex)
             {

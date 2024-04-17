@@ -6,11 +6,15 @@ namespace ProductBLL.Model
     {
         [Key]
         public int ID { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Brand is required")]
         public string Brand { get; set; }
-        [Required]
-        public int Price { get; set; }
+
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal Price { get; set; }
     }
 }
